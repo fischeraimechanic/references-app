@@ -15,16 +15,16 @@ const program = new Command();
 
 program
   .name('add-video')
-  .description('Upload a video to the archive')
+  .description('Upload a video to the archive (Oracle Object Storage)')
   .argument('<file>', 'Video file path')
   .option('-c, --category <category>', 'Category slug (e.g., housing)')
   .option('-t, --title <title>', 'Video title')
   .option('-d, --description <description>', 'Video description')
-  .option('--r2-endpoint <url>', 'R2 endpoint URL')
-  .option('--r2-bucket <name>', 'R2 bucket name')
-  .option('--r2-access-key <key>', 'R2 access key ID')
-  .option('--r2-secret-key <key>', 'R2 secret access key')
-  .option('--public-url <url>', 'Public URL for the bucket (e.g., https://pub-xxx.r2.dev)')
+  .option('--oci-endpoint <url>', 'OCI Object Storage endpoint')
+  .option('--oci-bucket <name>', 'OCI bucket name')
+  .option('--oci-access-key <key>', 'OCI access key')
+  .option('--oci-secret-key <key>', 'OCI secret key')
+  .option('--public-url <url>', 'Public URL for the bucket')
   .parse();
 
 const options = program.opts();
@@ -44,25 +44,27 @@ const category = options.category || 'uncategorized';
 const title = options.title || basename(inputFile, extname(inputFile));
 const description = options.description || '';
 
-const R2_ENDPOINT = options.r2Endpoint || process.env.R2_ENDPOINT;
-const R2_BUCKET = options.r2Bucket || process.env.R2_BUCKET;
-const R2_ACCESS_KEY = options.r2AccessKey || process.env.R2_ACCESS_KEY_ID;
-const R2_SECRET_KEY = options.r2SecretKey || process.env.R2_SECRET_ACCESS_KEY;
-const PUBLIC_URL = options.publicUrl || process.env.R2_PUBLIC_URL;
+const OCI_ENDPOINT = options.ociEndpoint || process.env.OCI_ENDPOINT;
+const OCI_BUCKET = options.ociBucket || process.env.OCI_BUCKET;
+const OCI_ACCESS_KEY = options.ociAccessKey || process.env.OCI_ACCESS_KEY;
+const OCI_SECRET_KEY = options.ociSecretKey || process.env.OCI_SECRET_KEY;
+const PUBLIC_URL = options.publicUrl || process.env.PUBLIC_R2_PUBLIC_URL;
 
-if (!R2_ENDPOINT || !R2_BUCKET || !R2_ACCESS_KEY || !R2_SECRET_KEY) {
-  console.error('Error: R2 credentials required. Set via options or env vars:');
-  console.error('  R2_ENDPOINT, R2_BUCKET, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY');
-  console.error('  Optional: R2_PUBLIC_URL');
+if (!OCI_ENDPOINT || !OCI_BUCKET || !OCI_ACCESS_KEY || !OCI_SECRET_KEY) {
+  console.error('Error: Oracle Object Storage credentials required. Set via options or env vars:');
+  console.error('  OCI_ENDPOINT, OCI_BUCKET, OCI_ACCESS_KEY, OCI_SECRET_KEY');
+  console.error('  Optional: PUBLIC_R2_PUBLIC_URL');
+  console.error('\nExample OCI_ENDPOINT:');
+  console.error('  https://my-namespace.compat.objectstorage.us-ashburn-1.oraclecloud.com');
   process.exit(1);
 }
 
 const s3Client = new S3Client({
   region: 'auto',
-  endpoint: R2_ENDPOINT,
+  endpoint: OCI_ENDPOINT,
   credentials: {
-    accessKeyId: R2_ACCESS_KEY,
-    secretAccessKey: R2_SECRET_KEY,
+    accessKeyId: OCI_ACCESS_KEY,
+    secretAccessKey: OCI_SECRET_KEY,
   },
 });
 
@@ -106,13 +108,13 @@ async function generateThumbnail(input, output) {
   ]);
 }
 
-async function uploadToR2(key, filePath, contentType) {
+async function uploadToOCI(key, filePath, contentType) {
   console.log(`Uploading ${key}...`);
   const fileStream = createReadStream(filePath);
   const upload = new Upload({
     client: s3Client,
     params: {
-      Bucket: R2_BUCKET,
+      Bucket: OCI_BUCKET,
       Key: key,
       Body: fileStream,
       ContentType: contentType,
@@ -146,8 +148,8 @@ async function main() {
     await transcodeVideo(inputFile, tempVideo);
     await generateThumbnail(inputFile, tempThumb);
 
-    await uploadToR2(videoFilename, tempVideo, 'video/mp4');
-    await uploadToR2(thumbFilename, tempThumb, 'image/jpeg');
+    await uploadToOCI(videoFilename, tempVideo, 'video/mp4');
+    await uploadToOCI(thumbFilename, tempThumb, 'image/jpeg');
 
     const data = loadVideosJson();
     
