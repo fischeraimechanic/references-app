@@ -9,5 +9,15 @@
       "description": "For employers"
     }
   },
-  "videos": []
+  "videos": [
+    {
+      "id": "c53fedae-1d48-4a4f-930c-fbf9d077d116",
+      "category": "housing",
+      "title": "Test upload",
+      "filename": "c53fedae-1d48-4a4f-930c-fbf9d077d116.mp4",
+      "thumbnail": "c53fedae-1d48-4a4f-930c-fbf9d077d116.jpg",
+      "description": "",
+      "uploadedAt": "2026-10-20"
+    }
+  ]
 }
