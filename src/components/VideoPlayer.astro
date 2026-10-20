@@ -1,0 +1,46 @@
+---
+interface Props {
+  src: string;
+  poster?: string;
+  title: string;
+  description?: string;
+}
+
+const { src, poster, title, description } = Astro.props;
+---
+
+<div class="video-container">
+  <video
+    class="video-player"
+    controls
+    preload="metadata"
+    poster={poster}
+    data-title={title}
+  >
+    <source src={src} type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+  {description && <p class="video-description">{description}</p>}
+</div>
+
+<style>
+  .video-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .video-player {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+    background: #000;
+    border-radius: 8px;
+  }
+
+  .video-description {
+    margin-top: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+  }
+</style>

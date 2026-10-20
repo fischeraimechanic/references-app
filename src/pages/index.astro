@@ -1,0 +1,58 @@
+---
+import { fetchArchiveData, type CategoryInfo } from '../lib/data';
+
+async function getCategories() {
+  const data = await fetchArchiveData();
+  const videos = data.videos || [];
+  const categories = data.categories || {};
+  
+  return Object.entries(categories).map(([slug, info]: [string, CategoryInfo]) => ({
+    slug,
+    title: info.title,
+    description: info.description,
+    videoCount: videos.filter((v: any) => v.category === slug).length
+  }));
+}
+
+const categories = await getCategories();
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Video Archive</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+      h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+      .subtitle { color: #666; margin-bottom: 2rem; }
+      .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+      .category-card { padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px; text-decoration: none; color: inherit; transition: box-shadow 0.2s, border-color 0.2s; }
+      .category-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #999; }
+      .category-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+      .category-description { color: #666; font-size: 0.9rem; margin-bottom: 1rem; }
+      .category-count { font-size: 0.85rem; color: #888; }
+      .empty { text-align: center; padding: 3rem; color: #888; }
+    </style>
+  </head>
+  <body>
+    <h1>Video Archive</h1>
+    <p class="subtitle">Organized references for sharing</p>
+    
+    {categories.length > 0 ? (
+      <div class="category-grid">
+        {categories.map(cat => (
+          <a href={`/category/${cat.slug}`} class="category-card">
+            <div class="category-title">{cat.title}</div>
+            <div class="category-description">{cat.description}</div>
+            <div class="category-count">{cat.videoCount} video{cat.videoCount !== 1 ? 's' : ''}</div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <p class="empty">No categories yet. Add videos with the upload script.</p>
+    )}
+  </body>
+</html>

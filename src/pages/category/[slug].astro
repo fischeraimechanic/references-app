@@ -1,0 +1,101 @@
+---
+import type { GetStaticPaths } from 'astro';
+import VideoPlayer from '../../components/VideoPlayer.astro';
+import { fetchArchiveData, type Video, type CategoryInfo } from '../../lib/data';
+
+export async function getStaticPaths() {
+  const data = await fetchArchiveData();
+  const categories = data.categories || {};
+  
+  return Object.keys(categories).map(slug => ({
+    params: { slug },
+    props: { categorySlug: slug }
+  }));
+}
+
+interface Props {
+  categorySlug: string;
+}
+
+const { categorySlug } = Astro.props;
+const data = await fetchArchiveData();
+const categories = data.categories || {};
+const videos = (data.videos || []).filter((v: Video) => v.category === categorySlug);
+const categoryInfo = categories[categorySlug] as CategoryInfo;
+
+const baseUrl = import.meta.env.PUBLIC_R2_PUBLIC_URL || '';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{categoryInfo?.title || categorySlug} - Video Archive</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+      .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+      .back-link { color: #666; text-decoration: none; font-size: 0.9rem; }
+      .back-link:hover { text-decoration: underline; }
+      h1 { font-size: 2rem; margin: 0; }
+      .category-description { color: #666; margin-top: 0.5rem; }
+      .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
+      .video-card { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+      .video-thumbnail { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #f0f0f0; }
+      .video-info { padding: 1rem; }
+      .video-title { font-weight: 600; margin: 0 0 0.5rem; font-size: 1rem; }
+      .video-meta { font-size: 0.8rem; color: #888; }
+      .video-description { margin: 0.5rem 0 0; font-size: 0.9rem; color: #555; }
+      .empty { text-align: center; padding: 3rem; color: #888; grid-column: 1 / -1; }
+      .share-hint { font-size: 0.8rem; color: #888; margin-top: 1rem; }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <a href="/" class="back-link">← Back to categories</a>
+        <h1>{categoryInfo?.title || categorySlug}</h1>
+        {categoryInfo?.description && <p class="category-description">{categoryInfo.description}</p>}
+      </div>
+    </div>
+
+    {videos.length > 0 ? (
+      <div class="video-grid">
+        {videos.map(video => {
+          const videoUrl = `${baseUrl}/${video.filename}`;
+          const thumbnailUrl = video.thumbnail ? `${baseUrl}/${video.thumbnail}` : undefined;
+          
+          return (
+            <article class="video-card" id={video.id}>
+              <VideoPlayer 
+                src={videoUrl} 
+                poster={thumbnailUrl}
+                title={video.title}
+                description={video.description}
+              />
+              <div class="video-info">
+                <h2 class="video-title">{video.title}</h2>
+                <div class="video-meta">Uploaded {new Date(video.uploadedAt).toLocaleDateString()}</div>
+                {video.description && <p class="video-description">{video.description}</p>}
+              </div>
+            </article>
+          )
+        })}
+      </div>
+    ) : (
+      <p class="empty">No videos in this category yet.</p>
+    )}
+
+    <p class="share-hint">Share this category: <code id="share-url"></code></p>
+
+    <script is:inline>
+      document.getElementById('share-url').textContent = window.location.origin + '/category/{categorySlug}';
+      document.querySelectorAll('video').forEach(v => {
+        v.addEventListener('loadedmetadata', () => {
+          v.style.opacity = '1';
+        });
+      });
+    </script>
+  </body>
+</html>

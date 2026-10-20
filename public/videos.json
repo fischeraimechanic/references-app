@@ -1,0 +1,13 @@
+{
+  "categories": {
+    "housing": {
+      "title": "Housing References",
+      "description": "For prospective landlords"
+    },
+    "employment": {
+      "title": "Work References",
+      "description": "For employers"
+    }
+  },
+  "videos": []
+}

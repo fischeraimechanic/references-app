@@ -1,0 +1,8 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "astro",
+  "env": {
+    "PUBLIC_R2_PUBLIC_URL": "@r2-public-url"
+  }
+}
