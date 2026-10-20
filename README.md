@@ -1,43 +1,48 @@
-# Astro Starter Kit: Minimal
+# References
 
-```sh
-npm create astro@latest -- --template minimal
+Personal video reference archive. Upload videos, organize by category, share via link.
+
+## Features
+- Categories (housing, employment, etc.)
+- Oracle Object Storage backend (free tier: 10GB + 10TB/month egress)
+- Transcodes to MP4, generates thumbnails
+- Static site on Vercel (free)
+- Share single videos or entire categories
+
+## Setup
+
+### 1. Oracle Cloud (one-time)
+1. Create bucket in Object Storage
+2. Generate Customer Secret Key (Access + Secret)
+3. Enable public read on bucket
+4. Note: Namespace, Region, bucket name
+
+### 2. Environment
+```bash
+cp .env.example .env
+# Edit .env with your Oracle credentials
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+### 3. Vercel
+- Import this repo
+- Add env var: `PUBLIC_R2_PUBLIC_URL` = your Oracle public bucket URL
+- Deploy
 
-## 🚀 Project Structure
+## Usage
 
-Inside of your Astro project, you'll see the following folders and files:
+```bash
+# Add a video
+npm run add-video ./my-video.mp4 --category housing --title "Apartment tour"
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+# Deploy
+git add src/data/videos.json public/videos.json
+git commit -m "Add video: Apartment tour"
+git push
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## Commands
+| Command | Action |
+|---------|--------|
+| `npm run dev` | Local dev server |
+| `npm run build` | Production build |
+| `npm run add-video <file>` | Upload + transcode + register |

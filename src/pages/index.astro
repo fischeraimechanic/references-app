@@ -22,7 +22,7 @@ const categories = await getCategories();
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
-    <title>Video Archive</title>
+    <title>References</title>
     <style>
       * { box-sizing: border-box; }
       body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; max-width: 1200px; margin: 0 auto; }
@@ -38,8 +38,8 @@ const categories = await getCategories();
     </style>
   </head>
   <body>
-    <h1>Video Archive</h1>
-    <p class="subtitle">Organized references for sharing</p>
+    <h1>References</h1>
+    <p class="subtitle">Organized video references for sharing</p>
     
     {categories.length > 0 ? (
       <div class="category-grid">
